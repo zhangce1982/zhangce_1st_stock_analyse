@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A股事件机会雷达</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">A-SHARE EVENT RADAR</p>
+        <h1>A股事件机会雷达</h1>
+        <p class="subtitle">基于财报、股东行为与政策事件的可解释研究工具</p>
+      </div>
+      <div class="controls">
+        <button class="active" data-horizon="short">短期</button>
+        <button data-horizon="medium">中期</button>
+      </div>
+    </header>
+    <section class="notice">当前展示模拟数据，仅用于验证产品结构，不构成投资建议。</section>
+    <section id="cards" class="grid" aria-live="polite"></section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
