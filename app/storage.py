@@ -4,7 +4,7 @@ import sqlite3
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from app.models import MarketEvent, Opportunity
+from app.models import MarketEvent, Opportunity, SignalObservation
 
 
 class ResearchStorage:
@@ -130,24 +130,53 @@ class ResearchStorage:
     def _save_opportunities_sync(self, opportunities: list[Opportunity]) -> None:
         now = datetime.now(timezone.utc).isoformat()
         with self._connect() as connection:
-            connection.executemany(
-                """
-                INSERT INTO opportunity_history
-                    (code, horizon, score, confidence, source, reasons_json, risks_json, data_updated_at, calculated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                [
-                    (
-                        item.code,
-                        item.horizon,
-                        item.score,
-                        item.confidence,
-                        item.source,
-                        json.dumps(item.reasons, ensure_ascii=False),
-                        json.dumps(item.risks, ensure_ascii=False),
-                        item.data_updated_at.isoformat(),
-                        now,
+            for item in opportunities:
+                values = (
+                    item.code,
+                    item.horizon,
+                    item.score,
+                    item.confidence,
+                    item.source,
+                    json.dumps(item.reasons, ensure_ascii=False),
+                    json.dumps(item.risks, ensure_ascii=False),
+                    item.data_updated_at.isoformat(),
+                    now,
+                )
+                connection.execute(
+                    """
+                    INSERT INTO opportunity_history
+                        (code, horizon, score, confidence, source, reasons_json, risks_json, data_updated_at, calculated_at)
+                    SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM opportunity_history
+                        WHERE code = ? AND horizon = ? AND score = ? AND data_updated_at = ?
                     )
-                    for item in opportunities
-                ],
+                    """,
+                    values + (item.code, item.horizon, item.score, item.data_updated_at.isoformat()),
+                )
+
+    async def list_signal_history(self, horizon: str) -> list[SignalObservation]:
+        return await asyncio.to_thread(self._list_signal_history_sync, horizon)
+
+    def _list_signal_history_sync(self, horizon: str) -> list[SignalObservation]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT code, horizon, score, confidence, source, calculated_at
+                FROM opportunity_history
+                WHERE horizon = ?
+                ORDER BY calculated_at
+                """,
+                (horizon,),
+            ).fetchall()
+        return [
+            SignalObservation(
+                code=row["code"],
+                horizon=row["horizon"],
+                score=row["score"],
+                confidence=row["confidence"],
+                source=row["source"],
+                calculated_at=datetime.fromisoformat(row["calculated_at"]),
             )
+            for row in rows
+        ]

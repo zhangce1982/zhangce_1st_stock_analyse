@@ -46,3 +46,33 @@ class MarketEvent(BaseModel):
     direction: Literal["positive", "negative", "neutral", "uncertain"]
     impact_score: float = Field(ge=0, le=100)
     evidence: list[str] = Field(default_factory=list)
+
+
+class SignalObservation(BaseModel):
+    code: str
+    horizon: Literal["short", "medium"]
+    score: float
+    confidence: Literal["low", "medium", "high"]
+    source: str
+    calculated_at: datetime
+
+
+class DailyPrice(BaseModel):
+    code: str
+    trade_date: date
+    close: float = Field(gt=0)
+
+
+class BacktestResult(BaseModel):
+    horizon: Literal["short", "medium"]
+    holding_days: int
+    total_signals: int
+    evaluated_signals: int
+    pending_signals: int
+    status: Literal["ready", "insufficient_data"]
+    win_rate: float | None = None
+    average_return: float | None = None
+    median_return: float | None = None
+    best_return: float | None = None
+    worst_return: float | None = None
+    methodology: str

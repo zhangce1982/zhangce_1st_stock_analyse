@@ -6,9 +6,11 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.backtest.prices import BaoStockHistoricalPriceProvider
+from app.backtest.service import BacktestService
 from app.config import settings
 from app.events.service import EventService
-from app.models import MarketEvent, Opportunity
+from app.models import BacktestResult, MarketEvent, Opportunity
 from app.providers import create_provider
 from app.services.scoring import score_snapshot
 from app.storage import ResearchStorage
@@ -17,6 +19,7 @@ app = FastAPI(title="A股事件机会雷达", version="0.1.0")
 provider = create_provider()
 storage = ResearchStorage(settings.database_path)
 event_service = EventService(settings.watchlist_codes, storage)
+backtest_service = BacktestService(storage, BaoStockHistoricalPriceProvider())
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
@@ -61,3 +64,10 @@ async def stock_opportunity(
 @app.get("/api/events", response_model=list[MarketEvent])
 async def events(target_date: date | None = Query(default=None)) -> list[MarketEvent]:
     return await event_service.list_events(target_date)
+
+
+@app.get("/api/backtest", response_model=list[BacktestResult])
+async def backtest(
+    horizon: Literal["short", "medium"] = Query(default="short"),
+) -> list[BacktestResult]:
+    return await backtest_service.evaluate(horizon)

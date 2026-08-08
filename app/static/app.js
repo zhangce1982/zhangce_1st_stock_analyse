@@ -1,6 +1,7 @@
 const cards = document.querySelector("#cards");
 const buttons = document.querySelectorAll("button[data-horizon]");
 const eventsContainer = document.querySelector("#events");
+const backtestContainer = document.querySelector("#backtest");
 
 async function load(horizon) {
   cards.innerHTML = "<p>正在计算机会评分…</p>";
@@ -18,13 +19,22 @@ async function load(horizon) {
     </article>`).join("");
 }
 
-buttons.forEach(button => button.addEventListener("click", () => {
-  buttons.forEach(x => x.classList.remove("active"));
-  button.classList.add("active");
-  load(button.dataset.horizon);
-}));
-
-load("short");
+async function loadBacktest(horizon = "short") {
+  backtestContainer.innerHTML = "<p>正在评估历史信号…</p>";
+  try {
+    const response = await fetch(`/api/backtest?horizon=${horizon}`);
+    const items = await response.json();
+    backtestContainer.innerHTML = items.map(item => `
+      <article class="metric-card">
+        <span>${item.holding_days} 个交易日</span>
+        <strong>${item.win_rate === null ? "待积累" : `${item.win_rate}%`}</strong>
+        <p>胜率 · 已评估 ${item.evaluated_signals}/${item.total_signals}</p>
+        <small>${item.status === "ready" ? "样本已达到展示门槛" : "样本不足，指标仅供观察"}</small>
+      </article>`).join("");
+  } catch (error) {
+    backtestContainer.innerHTML = "<p>回测接口暂时不可用。</p>";
+  }
+}
 
 async function loadEvents() {
   eventsContainer.innerHTML = "<p>正在获取公告与政策…</p>";
@@ -42,4 +52,13 @@ async function loadEvents() {
   }
 }
 
+buttons.forEach(button => button.addEventListener("click", () => {
+  buttons.forEach(x => x.classList.remove("active"));
+  button.classList.add("active");
+  load(button.dataset.horizon);
+  loadBacktest(button.dataset.horizon);
+}));
+
+load("short");
+loadBacktest("short");
 loadEvents();
