@@ -26,6 +26,8 @@ WATCHLIST=600519,000858,601318
 
 AKShare 依赖上游公开网页，接口失败时会自动尝试 BaoStock。缺失的政策、股东或估值字段采用中性值，并在页面标注；不会用虚构数据填补。
 
+项目默认使用免费的 SQLite 保存标准化事件和评分历史，以便接口故障时回退和进行历史回测。数据库位于 `data/app.db`，已被 `.gitignore` 排除；生产部署可在数据量增长后迁移到 PostgreSQL。这里保存的是研究所需的标准化记录，不是供应商原始数据库镜像。
+
 也可以使用 Docker：
 
 ```powershell
@@ -38,6 +40,10 @@ docker compose up --build
 - `GET /api/health`
 - `GET /api/opportunities?horizon=short`
 - `GET /api/stocks/{code}/opportunity?horizon=medium`
+- `GET /api/events`
+- `GET /api/events?target_date=2026-08-08`
+
+事件接口按需读取关注池公司的公开公告以及中国政府网最新政策，并返回原文链接、方向关键词、行业映射和规则影响分。规则评分只用于筛选，政策含义仍需人工复核。
 
 ## 安全约定
 

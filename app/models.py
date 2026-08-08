@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -32,3 +32,17 @@ class Opportunity(BaseModel):
     data_updated_at: datetime
     source: str
     missing_fields: list[str]
+
+
+class MarketEvent(BaseModel):
+    event_id: str
+    event_type: Literal["announcement", "policy"]
+    title: str
+    published_date: date
+    url: str
+    source: str
+    stock_codes: list[str] = Field(default_factory=list)
+    industries: list[str] = Field(default_factory=list)
+    direction: Literal["positive", "negative", "neutral", "uncertain"]
+    impact_score: float = Field(ge=0, le=100)
+    evidence: list[str] = Field(default_factory=list)

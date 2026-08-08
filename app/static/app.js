@@ -1,5 +1,6 @@
 const cards = document.querySelector("#cards");
 const buttons = document.querySelectorAll("button[data-horizon]");
+const eventsContainer = document.querySelector("#events");
 
 async function load(horizon) {
   cards.innerHTML = "<p>正在计算机会评分…</p>";
@@ -24,3 +25,21 @@ buttons.forEach(button => button.addEventListener("click", () => {
 }));
 
 load("short");
+
+async function loadEvents() {
+  eventsContainer.innerHTML = "<p>正在获取公告与政策…</p>";
+  try {
+    const response = await fetch("/api/events");
+    const items = await response.json();
+    eventsContainer.innerHTML = items.length ? items.slice(0, 20).map(item => `
+      <a class="event" href="${item.url}" target="_blank" rel="noopener noreferrer">
+        <div><span class="event-type">${item.event_type === "policy" ? "政策" : "公告"}</span><span class="event-date">${item.published_date}</span></div>
+        <strong>${item.title}</strong>
+        <p>${item.industries.length ? item.industries.join(" · ") : "尚未映射行业"} · 影响 ${item.impact_score}</p>
+      </a>`).join("") : "<p>当前没有取得事件，可能是上游接口暂时不可用。</p>";
+  } catch (error) {
+    eventsContainer.innerHTML = "<p>事件接口暂时不可用。</p>";
+  }
+}
+
+loadEvents();

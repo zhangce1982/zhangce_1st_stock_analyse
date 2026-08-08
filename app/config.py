@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     data_provider: str = "mock"
     provider_fallback: str | None = "baostock"
     watchlist: str = "600519,000858,601318"
+    database_path: str = "data/app.db"
     ifind_api_key: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
