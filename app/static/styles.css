@@ -19,5 +19,5 @@ h2 { margin: 4px 0; }
 h3 { color: #b9cabe; font-size: 13px; margin-top: 22px; text-transform: uppercase; letter-spacing: .08em; }
 ul { padding-left: 20px; color: #d1ddd5; line-height: 1.65; }
 .risk { color: #e2c58c; }
+.source { margin-top: 22px; padding-top: 14px; border-top: 1px solid #244235; color: #789184; font-size: 12px; }
 @media (max-width: 640px) { header { align-items: start; flex-direction: column; } main { padding-top: 36px; } }
-

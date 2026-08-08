@@ -13,6 +13,7 @@ async function load(horizon) {
       </div>
       <h3>主要依据</h3><ul>${item.reasons.map(x => `<li>${x}</li>`).join("")}</ul>
       <h3>风险提示</h3><ul class="risk">${item.risks.map(x => `<li>${x}</li>`).join("")}</ul>
+      <p class="source">数据源：${item.source}${item.missing_fields.length ? ` · 缺失字段 ${item.missing_fields.length} 项` : ""}</p>
     </article>`).join("");
 }
 
@@ -23,4 +24,3 @@ buttons.forEach(button => button.addEventListener("click", () => {
 }));
 
 load("short");
-

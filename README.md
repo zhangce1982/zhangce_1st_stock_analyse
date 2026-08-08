@@ -1,6 +1,6 @@
 # A股事件机会雷达
 
-一个以财报、股东行为和政策事件为输入的可解释 A 股研究 MVP。当前数据提供器为模拟实现，后续通过统一适配层接入已获授权的 iFinD 或其他数据 API。
+一个以财报、股东行为和政策事件为输入的可解释 A 股研究 MVP。支持模拟数据、AKShare，以及作为免费备用源的 BaoStock。
 
 > 仅用于研究和软件验证，不构成投资建议。
 
@@ -15,6 +15,16 @@ uvicorn app.main:app --reload
 ```
 
 打开 `http://127.0.0.1:8000`，接口文档位于 `http://127.0.0.1:8000/docs`。
+
+默认使用模拟数据。启用免费公开数据时修改 `.env`：
+
+```dotenv
+DATA_PROVIDER=akshare
+PROVIDER_FALLBACK=baostock
+WATCHLIST=600519,000858,601318
+```
+
+AKShare 依赖上游公开网页，接口失败时会自动尝试 BaoStock。缺失的政策、股东或估值字段采用中性值，并在页面标注；不会用虚构数据填补。
 
 也可以使用 Docker：
 

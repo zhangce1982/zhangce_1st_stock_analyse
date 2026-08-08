@@ -46,6 +46,8 @@ def score_snapshot(
         risks.append("估值信号偏高")
     if snapshot.risk_penalty >= 15:
         risks.append("存在需要复核的风险扣分项")
+    if snapshot.missing_fields:
+        risks.append("部分字段缺失，评分已采用中性值")
     if not risks:
         risks.append("仍需关注市场波动与数据更新风险")
 
@@ -60,5 +62,6 @@ def score_snapshot(
         reasons=reasons,
         risks=risks,
         data_updated_at=snapshot.updated_at,
+        source=snapshot.source,
+        missing_fields=snapshot.missing_fields,
     )
-

@@ -16,6 +16,8 @@ class StockSnapshot(BaseModel):
     valuation_signal: float = Field(ge=-100, le=100)
     risk_penalty: float = Field(ge=0, le=100)
     updated_at: datetime
+    source: str = "unknown"
+    missing_fields: list[str] = Field(default_factory=list)
 
 
 class Opportunity(BaseModel):
@@ -28,4 +30,5 @@ class Opportunity(BaseModel):
     reasons: list[str]
     risks: list[str]
     data_updated_at: datetime
-
+    source: str
+    missing_fields: list[str]
